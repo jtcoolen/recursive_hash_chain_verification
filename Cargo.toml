@@ -1,0 +1,24 @@
+[package]
+name = "ivc_poseidon"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.89"
+poseidon2_plonky2 = { git = "https://github.com/Lagrange-Labs/plonky2", branch = "introduce_poseidon2_build_for_aarch64" }
+plonky2 = { git = "https://github.com/Lagrange-Labs/plonky2", branch = "introduce_poseidon2_build_for_aarch64" }
+
+plonky2_field = { git = "https://github.com/Lagrange-Labs/plonky2", branch = "introduce_poseidon2_build_for_aarch64" }
+rand = "0.8.5"
+thiserror = "1.0.64"
+
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "poseidon"
+harness = false
+
+[profile.bench]
+opt-level = 3

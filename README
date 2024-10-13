@@ -1,0 +1,3 @@
+Override the rust toolchain if needed. Expects a nightly build of Rust.
+
+Then run `cargo bench`.
