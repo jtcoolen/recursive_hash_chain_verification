@@ -73,19 +73,28 @@ pub fn setup_circuit(depth: usize) -> Result<CircuitSetup<GoldilocksField, C, D>
     let initial_hash_target = builder.add_virtual_hash();
     builder.register_public_inputs(&initial_hash_target.elements);
 
+    let one = builder.one();
+    let mut count = counter;
+    let mut n_iter = builder.zero();
+
     let current_hash_in = builder.add_virtual_hash();
 
     // Hash the current depth and the previous hash (inner_cyclic_latest_hash or initial hash)
-    let current_hash_out = builder.hash_n_to_hash_no_pad::<PoseidonHash>(
-        [[counter].to_vec(), current_hash_in.elements.to_vec()].concat(),
-    );
-    builder.register_public_inputs(&current_hash_out.elements);
+
+    let mut intermediate_hash = current_hash_in;
+    for _i in 0..128 {
+        intermediate_hash = builder.hash_n_to_hash_no_pad::<PoseidonHash>(
+            [[count].to_vec(), intermediate_hash.elements.to_vec()].concat(),
+        );
+        count = builder.add(count, one);
+        n_iter = builder.add(n_iter, one);
+    }
+
+    builder.register_public_inputs(&intermediate_hash.elements);
 
     let verifier_data_target = builder.add_verifier_data_public_inputs();
 
     let condition = builder.add_virtual_bool_target_safe();
-
-    let one = builder.one();
 
     let mut common_data = common_data::<F, C, D>();
     common_data.num_public_inputs = builder.num_public_inputs();
@@ -100,7 +109,7 @@ pub fn setup_circuit(depth: usize) -> Result<CircuitSetup<GoldilocksField, C, D>
         current_hash_in,
         &inner_cyclic_proof_with_pis,
         counter,
-        one,
+        n_iter,
     )?;
 
     // If condition is true, verifies the provided inner proof against the current state.
@@ -133,7 +142,7 @@ fn connect_proof_hash_states(
     current_hash_in: HashOutTarget,
     inner_cyclic_proof_with_pis: &ProofWithPublicInputsTarget<D>,
     counter: Target,
-    one: Target,
+    n_iter: Target,
 ) -> Result<()> {
     let inner_cyclic_pis = &inner_cyclic_proof_with_pis.public_inputs;
 
@@ -162,7 +171,7 @@ fn connect_proof_hash_states(
 
     // Update counter by adding 1 to inner_cyclic_counter if the condition is true.
     // Otherwise, the counter remains unchanged.
-    let new_counter = builder.mul_add(condition.target, inner_cyclic_counter, one);
+    let new_counter = builder.mul_add(condition.target, inner_cyclic_counter, n_iter);
     builder.connect(counter, new_counter);
 
     Ok(())

@@ -12,13 +12,11 @@ criterion_group! {
 criterion_main!(recursive_snark);
 
 fn bench_recursive_snark_prove(c: &mut Criterion) {
-    let depths = vec![10, 20];
+    let depths = vec![32];
 
     for d in depths {
         let mut group = c.benchmark_group(format!("Plonky2-Poseidon-num-steps-{}", d));
         group.sample_size(10);
-
-        let d = d - 1;
 
         group.bench_function("Prove", |b| {
             b.iter(|| {
@@ -36,7 +34,7 @@ fn bench_recursive_snark_prove(c: &mut Criterion) {
 }
 
 fn bench_recursive_snark_verify(c: &mut Criterion) {
-    let depths = vec![10; 20];
+    let depths = vec![32];
 
     for d in depths {
         let mut group = c.benchmark_group(format!("Plonky2-Poseidon-num-steps-{}", d));

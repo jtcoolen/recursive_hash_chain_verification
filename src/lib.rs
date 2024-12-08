@@ -25,8 +25,9 @@ pub fn recursive_proof(
         ))?;
     }
 
+    let circuit_setup = setup_circuit(depth)?;
+
     let adjusted_depth = depth - 1; // for zero-based indexing
-    let circuit_setup = setup_circuit(adjusted_depth)?;
 
     let proof = build_recursive_proof(adjusted_depth, initial_hash, &circuit_setup)?;
 

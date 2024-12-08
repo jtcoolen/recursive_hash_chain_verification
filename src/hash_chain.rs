@@ -23,7 +23,7 @@ pub fn hash_chain<F: RichField>(initial_state: [F; 4], n: usize) -> [F; 4] {
     // Use fold to iterate from 1 to n and accumulate the hash state
     (1..=n).fold(initial_state, |current, i| {
         hash_n_to_hash_no_pad::<F, PoseidonPermutation<F>>(
-            &[F::from_canonical_u32(i as u32)]
+            &[F::from_canonical_u32(127 + i as u32)]
                 .iter()
                 .chain(current.iter())
                 .copied()
